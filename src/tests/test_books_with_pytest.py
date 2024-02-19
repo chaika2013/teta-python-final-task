@@ -127,3 +127,20 @@ async def test_update_book(db_session, async_client):
     assert res.count_pages == 100
     assert res.year == 2007
     assert res.id == book.id
+
+@pytest.mark.asyncio
+async def test_get_book_not_found(db_session, async_client):
+    """
+    Test GET /book/id when there is no such id.
+    """
+    response = await async_client.get("/api/v1/books/12345")
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+
+@pytest.mark.asyncio
+async def test_delete_book_not_found(db_session, async_client):
+    """
+    Test DELETE /book/id when there is no such id.
+    """
+    response = await async_client.delete("/api/v1/books/12345")
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+

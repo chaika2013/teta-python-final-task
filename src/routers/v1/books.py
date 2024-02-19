@@ -47,8 +47,9 @@ async def get_all_books(session: DBSession):
 # Ручка для получения книги по ее ИД
 @books_router.get("/{book_id}", response_model=ReturnedBook)
 async def get_book(book_id: int, session: DBSession):
-    res = await session.get(Book, book_id)
-    return res
+    if book := await session.get(Book, book_id):
+        return book
+    return Response(status_code=status.HTTP_404_NOT_FOUND)
 
 
 # Ручка для удаления книги
@@ -58,8 +59,9 @@ async def delete_book(book_id: int, session: DBSession):
     ic(deleted_book)  # Красивая и информативная замена для print. Полезна при отладке.
     if deleted_book:
         await session.delete(deleted_book)
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
 
-    return Response(status_code=status.HTTP_204_NO_CONTENT)  # Response может вернуть текст и метаданные.
+    return Response(status_code=status.HTTP_404_NOT_FOUND)
 
 
 # Ручка для обновления данных о книге
