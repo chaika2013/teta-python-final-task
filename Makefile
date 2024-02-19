@@ -29,6 +29,12 @@ tests:
 	make isort-check; make black-check; make flake8-check; make pytest
 
 up_compose:
-	docker-compose -f docker-compose.yml up -d
+	docker-compose up -d && docker-compose logs -f
 down_compose:
-	docker-compose -f docker-compose.yml down
+	docker-compose down
+
+shell:
+	poetry shell
+
+run:
+	uvicorn src.main:app --reload
