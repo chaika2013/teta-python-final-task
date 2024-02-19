@@ -4,13 +4,6 @@ from sqlalchemy import select
 
 from src.models import books
 
-result = {
-    "books": [
-        {"author": "fdhgdh", "title": "jdhdj", "year": 1997},
-        {"author": "fdhgdfgfrh", "title": "jrrgdhdj", "year": 2001},
-    ]
-}
-
 
 # Тест на ручку создающую книгу
 @pytest.mark.asyncio
