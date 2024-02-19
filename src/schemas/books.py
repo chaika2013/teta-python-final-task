@@ -15,7 +15,6 @@ class BaseBook(BaseModel):
 class IncomingBook(BaseBook):
     year: int = 2024  # Пример присваивания дефолтного значения
     count_pages: int = Field(
-        alias="pages",
         default=300,
     )  # Пример использования тонкой настройки полей. Передачи в них метаинформации.
 

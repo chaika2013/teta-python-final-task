@@ -8,7 +8,7 @@ from src.models import books
 # Тест на ручку создающую книгу
 @pytest.mark.asyncio
 async def test_create_book(async_client):
-    data = {"title": "Wrong Code", "author": "Robert Martin", "pages": 104, "year": 2007}
+    data = {"title": "Wrong Code", "author": "Robert Martin", "count_pages": 104, "year": 2007}
     response = await async_client.post("/api/v1/books/", json=data)
 
     assert response.status_code == status.HTTP_201_CREATED
