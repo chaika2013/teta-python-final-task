@@ -1,6 +1,8 @@
+from typing import List
 from pydantic import BaseModel, Field, EmailStr, SecretStr
+from .books import ReturnedBookWithoutSeller
 
-__all__ = ["IncomingSeller", "ReturnedAllSellers", "ReturnedSeller"]
+__all__ = ["BaseSeller", "IncomingSeller", "ReturnedAllSellers", "ReturnedSeller", "ReturnedSellerWithBooks"]
 
 class BaseSeller(BaseModel):
     first_name: str = Field(..., min_length=1)
@@ -12,6 +14,9 @@ class IncomingSeller(BaseSeller):
 
 class ReturnedSeller(BaseSeller):
     id: int
+
+class ReturnedSellerWithBooks(ReturnedSeller):
+    books: List[ReturnedBookWithoutSeller]
 
 class ReturnedAllSellers(BaseModel):
     sellers: list[ReturnedSeller]

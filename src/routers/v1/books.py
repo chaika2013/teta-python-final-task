@@ -3,6 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Response, status
 from icecream import ic
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.configurations.database import get_async_session
@@ -26,9 +27,15 @@ async def create_book(
         author=book.author,
         year=book.year,
         count_pages=book.count_pages,
+        seller_id=book.seller_id,
     )
+
     session.add(new_book)
-    await session.flush()
+    try:
+        await session.flush()
+    except IntegrityError:
+        await session.rollback()
+        return Response(status_code=status.HTTP_400_BAD_REQUEST)
 
     return new_book
 
@@ -73,8 +80,13 @@ async def update_book(book_id: int, new_data: IncomingBook, session: DBSession):
         updated_book.title = new_data.title
         updated_book.year = new_data.year
         updated_book.count_pages = new_data.count_pages
+        updated_book.seller_id = new_data.seller_id
 
-        await session.flush()
+        try:
+            await session.flush()
+        except IntegrityError:
+            await session.rollback()
+            return Response(status_code=status.HTTP_400_BAD_REQUEST)
 
         return updated_book
 

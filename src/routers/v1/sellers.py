@@ -5,7 +5,8 @@ from typing import Annotated
 
 from src.configurations.database import get_async_session
 from src.models.sellers import Seller
-from src.schemas import ReturnedAllSellers, ReturnedSeller, IncomingSeller
+from src.models.books import Book
+from src.schemas import ReturnedAllSellers, ReturnedSeller, IncomingSeller, ReturnedSellerWithBooks, BaseSeller
 
 sellers_router = APIRouter(tags=["seller"], prefix="/seller")
 
@@ -20,10 +21,14 @@ async def get_all_sellers(session: DBSession):
     return {"sellers": books}
 
 # Return seller by ID
-@sellers_router.get("/{seller_id}", response_model=ReturnedSeller)
+@sellers_router.get("/{seller_id}", response_model=ReturnedSellerWithBooks)
 async def get_seller(seller_id: int, session: DBSession):
-    res = await session.get(Seller, seller_id)
-    return res
+    seller = await session.get(Seller, seller_id)
+    if seller:
+        books = await session.execute(select(Book).where(Book.seller_id==seller.id))
+        seller.books = books.scalars().all()
+        return seller
+    return Response(status_code=status.HTTP_404_NOT_FOUND)
 
 # Add new seller
 @sellers_router.post("", response_model=ReturnedSeller, status_code=status.HTTP_201_CREATED)  # Прописываем модель ответа
@@ -52,13 +57,12 @@ async def delete_seller(seller_id: int, session: DBSession):
     return Response(status_code=status.HTTP_404_NOT_FOUND)
 
 # Update by seller id
-@sellers_router.put("/{seller_id}")
-async def update_book(seller_id: int, new_data: IncomingSeller, session: DBSession):
+@sellers_router.put("/{seller_id}", response_model=ReturnedSeller)
+async def update_seller(seller_id: int, new_data: BaseSeller, session: DBSession):
     if updated_seller := await session.get(Seller, seller_id):
         updated_seller.first_name = new_data.first_name
         updated_seller.last_name = new_data.last_name
         updated_seller.email = new_data.email
-        updated_seller.password = new_data.password.get_secret_value()
 
         await session.flush()
 
