@@ -7,12 +7,12 @@ from src.configurations.database import get_async_session
 from src.models.sellers import Seller
 from src.schemas import ReturnedAllSellers, ReturnedSeller, IncomingSeller
 
-sellers_router = APIRouter(tags=["sellers"], prefix="/sellers")
+sellers_router = APIRouter(tags=["seller"], prefix="/seller")
 
 DBSession = Annotated[AsyncSession, Depends(get_async_session)]
 
 # Return all sellers
-@sellers_router.get("/", response_model=ReturnedAllSellers)
+@sellers_router.get("", response_model=ReturnedAllSellers)
 async def get_all_sellers(session: DBSession):
     query = select(Seller)
     res = await session.execute(query)
@@ -26,7 +26,7 @@ async def get_seller(seller_id: int, session: DBSession):
     return res
 
 # Add new seller
-@sellers_router.post("/", response_model=ReturnedSeller, status_code=status.HTTP_201_CREATED)  # Прописываем модель ответа
+@sellers_router.post("", response_model=ReturnedSeller, status_code=status.HTTP_201_CREATED)  # Прописываем модель ответа
 async def create_seller(
     seller: IncomingSeller, session: DBSession
 ):
