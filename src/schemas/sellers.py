@@ -20,3 +20,4 @@ class ReturnedSellerWithBooks(ReturnedSeller):
 
 class ReturnedAllSellers(BaseModel):
     sellers: list[ReturnedSeller]
+

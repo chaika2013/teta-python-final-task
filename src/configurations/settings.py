@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     db_name: str = 'fastapi_project_db'
     db_test_name: str = "fastapi_project_test_db"
     max_connection_count: int = 10
+    jwt_secret: str = "secret"
 
     @property
     def database_url(self) -> str:

@@ -179,3 +179,14 @@ async def test_delete_seller_with_books(db_session, async_client):
     all_books = await db_session.execute(select(books.Book))
     res = all_books.scalars().all()
     assert len(res) == 0
+
+@pytest.mark.asyncio
+async def test_create_seller_with_existing_email(db_session, async_client):
+    seller = sellers.Seller(first_name="Alex", last_name="Bukin", email="bukin@yahoo.com", password="password1")
+    db_session.add(seller)
+    await db_session.flush()
+
+    data = {"first_name": "Nick", "last_name": "Lemming", "email": "bukin@yahoo.com", "password": "password2"}
+    response = await async_client.post("/api/v1/seller", json=data)
+
+    assert response.status_code == status.HTTP_409_CONFLICT

@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, Response, status
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Annotated
 
@@ -42,7 +43,12 @@ async def create_seller(
     )
     new_seller.set_password(seller.password.get_secret_value())
     session.add(new_seller)
-    await session.flush()
+
+    try:
+        await session.flush()
+    except IntegrityError:
+        await session.rollback()
+        return Response(status_code=status.HTTP_409_CONFLICT)
 
     return new_seller
 
