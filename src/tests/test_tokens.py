@@ -17,7 +17,8 @@ async def test_create_token(db_session, async_client):
     assert response.status_code == status.HTTP_200_OK
 
     result_data = response.json()
-    assert ("jwt" in result_data)
+    assert ("access_token" in result_data)
+    assert result_data['token_type'] == "bearer"
 
 @pytest.mark.asyncio
 async def test_create_token_wrong_password(db_session, async_client):

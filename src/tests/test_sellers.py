@@ -1,3 +1,6 @@
+import jwt
+
+from logging import warn
 import pytest
 
 from fastapi import status
@@ -56,6 +59,16 @@ async def test_get_sellers(db_session, async_client):
     }
 
 @pytest.mark.asyncio
+async def test_get_seller_by_id_unauthorized(db_session, async_client):
+    seller = sellers.Seller(first_name="Alex", last_name="Bukin", email="bukin@yahoo.com", password="password1")
+    db_session.add_all([seller])
+    await db_session.flush()
+
+    response = await async_client.get(f"/api/v1/seller/{seller.id}")
+
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+@pytest.mark.asyncio
 async def test_get_seller_by_id(db_session, async_client):
     seller = sellers.Seller(first_name="Alex", last_name="Bukin", email="bukin@yahoo.com", password="password1")
     db_session.add_all([seller])
@@ -66,7 +79,8 @@ async def test_get_seller_by_id(db_session, async_client):
     db_session.add_all([seller, book1, book2])
     await db_session.flush()
 
-    response = await async_client.get(f"/api/v1/seller/{seller.id}")
+    access_token = jwt.encode({"id": seller.id}, "secret", algorithm="HS256")
+    response = await async_client.get(f"/api/v1/seller/{seller.id}", headers={"Authenticate": f"Bearer {access_token}"})
 
     assert response.status_code == status.HTTP_200_OK
 
@@ -79,14 +93,14 @@ async def test_get_seller_by_id(db_session, async_client):
             {
                 'author': 'Pushkin',
                 'count_pages': 104,
-                'id': 10,
+                'id': book1.id,
                 'title': 'Eugeny Onegin',
                 'year': 2001,
             },
             {
                 'author': 'Lermontov',
                 'count_pages': 104,
-                'id': 11,
+                'id': book2.id,
                 'title': 'Mziri',
                 'year': 1997,
             },
@@ -96,7 +110,7 @@ async def test_get_seller_by_id(db_session, async_client):
 @pytest.mark.asyncio
 async def test_get_seller_by_id_not_found(async_client):
     response = await async_client.get(f"/api/v1/seller/12345")
-    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 @pytest.mark.asyncio
 async def test_delete_seller(db_session, async_client):

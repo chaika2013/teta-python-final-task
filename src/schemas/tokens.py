@@ -1,11 +1,12 @@
 from pydantic import BaseModel, EmailStr, SecretStr
 
-__all__ = ["IncomingAuth", "ReturnedToken"]
+__all__ = ["IncomingAuth", "Token"]
 
 class IncomingAuth(BaseModel):
     email: EmailStr
     password: SecretStr
 
-class ReturnedToken(BaseModel):
-    jwt: str
+class Token(BaseModel):
+    access_token: str
+    token_type: str
 

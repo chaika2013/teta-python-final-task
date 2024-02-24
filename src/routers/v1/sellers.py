@@ -9,6 +9,8 @@ from src.models.sellers import Seller
 from src.models.books import Book
 from src.schemas import ReturnedAllSellers, ReturnedSeller, IncomingSeller, ReturnedSellerWithBooks, BaseSeller
 
+from .tokens import get_current_user
+
 sellers_router = APIRouter(tags=["seller"], prefix="/seller")
 
 DBSession = Annotated[AsyncSession, Depends(get_async_session)]
@@ -23,13 +25,15 @@ async def get_all_sellers(session: DBSession):
 
 # Return seller by ID
 @sellers_router.get("/{seller_id}", response_model=ReturnedSellerWithBooks)
-async def get_seller(seller_id: int, session: DBSession):
-    seller = await session.get(Seller, seller_id)
-    if seller:
-        books = await session.execute(select(Book).where(Book.seller_id==seller.id))
-        seller.books = books.scalars().all()
-        return seller
-    return Response(status_code=status.HTTP_404_NOT_FOUND)
+async def get_seller(seller_id: int, session: DBSession, current_user: Annotated[Seller, Depends(get_current_user)]):
+    unauthorized = Response(headers={"WWW-Authenticate": "Bearer"}, status_code=status.HTTP_401_UNAUTHORIZED)
+    if current_user is None:
+        return unauthorized
+    if current_user.id != seller_id:
+        return unauthorized
+    books = await session.execute(select(Book).where(Book.seller_id==seller_id))
+    current_user.books = books.scalars().all()
+    return current_user
 
 # Add new seller
 @sellers_router.post("", response_model=ReturnedSeller, status_code=status.HTTP_201_CREATED)  # Прописываем модель ответа
