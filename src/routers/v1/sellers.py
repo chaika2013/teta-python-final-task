@@ -39,8 +39,8 @@ async def create_seller(
         first_name=seller.first_name,
         last_name=seller.last_name,
         email=seller.email,
-        password=seller.password.get_secret_value(),
     )
+    new_seller.set_password(seller.password.get_secret_value())
     session.add(new_seller)
     await session.flush()
 
